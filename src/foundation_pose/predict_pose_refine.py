@@ -13,7 +13,6 @@ import time
 import numpy as np
 from omegaconf import OmegaConf
 import torch
-from pytorch3d.transforms import so3_exp_map
 
 from .models.refine_network import RefineNet
 from .Utils import (
@@ -22,6 +21,7 @@ from .Utils import (
     depth_to_vis,
     make_grid_image,
     cv_draw_text,
+    so3_exp_map
 )
 
 

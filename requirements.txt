@@ -11,6 +11,10 @@ opencv-python
 open3d
 kornia
 matplotlib
-pandas
 ruamel.yaml
 torchvision
+pillow
+transformations
+warp-lang
+# git+https://github.com/NVlabs/nvdiffrast/
+# git+https://github.com/NVIDIA/warp.git

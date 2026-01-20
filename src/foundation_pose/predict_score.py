@@ -14,10 +14,9 @@ import torch
 from omegaconf import OmegaConf
 from tqdm import tqdm
 
-code_dir = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(f"{code_dir}/../../../")
-from Utils import *
-from learning.models.score_network import *
+
+from .Utils import *
+from .models.score_network import *
 
 
 def vis_batch_data_scores(pose_data, ids, scores, pad_margin=5):

@@ -7,8 +7,11 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 
-from Utils import *
+from .Utils import *
 import json,os,sys
+import glob
+import copy
+import imageio
 
 
 BOP_LIST = ['lmo','tless','ycbv','hb','tudl','icbin','itodd']
