@@ -15,6 +15,8 @@ ruamel.yaml
 torchvision
 pillow
 transformations
+trimesh
+pyglet<2.0.0
 warp-lang
 # git+https://github.com/NVlabs/nvdiffrast/
 # git+https://github.com/NVIDIA/warp.git

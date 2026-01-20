@@ -2,7 +2,7 @@ import argparse
 import os
 import logging
 import torch
-from foundation_pose.Utils import set_logging_format, set_seed, draw_posed_3d_box, draw_xyz_axis, nvdiffrast_render
+from foundation_pose.Utils import set_logging_format, set_seed, draw_posed_3d_box, draw_xyz_axis, nvdiffrast_render, depth2xyzmap
 from foundation_pose import FoundationPose, ScorePredictor, PoseRefinePredictor
 import numpy as np
 import cv2
@@ -18,8 +18,8 @@ def parse_args():
     parser.add_argument('--mesh_file', type=str, help='Path to the CAD model (e.g. .obj file)', default=f'../data/model.obj')
     parser.add_argument('--rgb_file', type=str, help='Path to RGB image', default=f'../data/rgb.png')
     parser.add_argument('--depth_file', type=str, help='Path to Depth image', default=f'../data/depth.png')
-    parser.add_argument('--mask_file', type=str, help='Path to Object Mask image', default=f'../data/mask_3.png')
-    parser.add_argument('--pcd_file', type=str, help='Path to Point Cloud file (e.g. .ply)', default=f'../data/scene.ply')
+    parser.add_argument('--mask_file', type=str, help='Path to Object Mask image', default=f'../data/mask_0.png')
+    # parser.add_argument('--pcd_file', type=str, help='Path to Point Cloud file (e.g. .ply)', default=f'../data/scene.ply')
     parser.add_argument('--cam_K_file', type=str, help='Path to text file containing 3x3 Camera Intrinsics matrix', default=f'../data/cam_K.txt')
     parser.add_argument('--depth_scale', type=float, default=1000.0, help='Scale factor to divide depth image by to get meters (e.g. 1000 if depth is in mm)')
     parser.add_argument('--resize_factor', type=float, default=1, help='Resize factor for images. e.g. 0.5 for half size')
@@ -174,12 +174,12 @@ def main():
             m.export(f'{debug_dir}/model_tf.obj')
             print(f"Saved transformed mesh to {debug_dir}/model_tf.obj")
             
-        if False:
+        if True:
             scene = trimesh.Scene()
             scene.add_geometry(trimesh.creation.axis(origin_size=0.05))
             
             # Load and add Point Cloud if exists
-            if args.pcd_file and os.path.exists(args.pcd_file):
+            if False:#args.pcd_file and os.path.exists(args.pcd_file):
                 logging.info(f"Loading point cloud from {args.pcd_file}")
                 pcd = trimesh.load(args.pcd_file)
                 # Scale point cloud if necessary
@@ -196,7 +196,13 @@ def main():
                 
                 scene.add_geometry(pcd)
             else:
-                logging.warning(f"Point cloud file not found: {args.pcd_file}")
+                logging.info("Generating point cloud from depth image")
+                xyz_map = depth2xyzmap(depth, K)
+                valid_mask = depth > 0.001
+                pts = xyz_map[valid_mask].reshape(-1, 3)
+                colors = rgb[valid_mask].reshape(-1, 3)
+                pcd = trimesh.PointCloud(vertices=pts, colors=colors)
+                scene.add_geometry(pcd)
 
             for i, pose in enumerate(poses):
                 m = mesh.copy()
