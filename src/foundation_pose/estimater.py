@@ -5,6 +5,7 @@
 # and any modifications thereto.  Any use, reproduction, disclosure or
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
+from jsonschema.benchmarks.subcomponents import v
 
 
 import logging
@@ -220,6 +221,7 @@ class FoundationPose:
         depth: np.ndarray,
         ob_mask: np.ndarray,
         iteration=5,
+        get_vis=False,
     ):
         """
 
@@ -271,7 +273,7 @@ class FoundationPose:
             xyz_map=xyz_map,
             glctx=self.glctx,
             iteration=iteration,
-            get_vis=True,
+            get_vis=get_vis,
         )
 
         scores, vis = self.scorer.predict(
@@ -283,7 +285,7 @@ class FoundationPose:
             mesh_tensors=self.mesh_tensors,
             mesh=self.mesh,
             glctx=self.glctx,
-            get_vis=True,
+            get_vis=get_vis,
         )
 
         ids = torch.as_tensor(scores).argsort(descending=True)
@@ -299,7 +301,7 @@ class FoundationPose:
 
         return best_pose.data.cpu().numpy()
 
-    def track_one(self, rgb, depth, K, iteration, extra={}):
+    def track_one(self, rgb, depth, K, iteration, get_vis=False):
         if self.pose_last is None:
             logging.info("Please init pose by register first")
             raise RuntimeError
@@ -324,7 +326,7 @@ class FoundationPose:
             xyz_map=xyz_map,
             glctx=self.glctx,
             iteration=iteration,
-            get_vis=True,
+            get_vis=get_vis,
         )
 
         self.pose_last = pose

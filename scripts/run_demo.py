@@ -5,6 +5,7 @@
 # and any modifications thereto.  Any use, reproduction, disclosure or
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
+from fontTools.misc.symfont import c
 
 
 import argparse
@@ -43,8 +44,12 @@ if __name__=='__main__':
   to_origin, extents = trimesh.bounds.oriented_bounds(mesh)
   bbox = np.stack([-extents/2, extents/2], axis=0).reshape(2,3)
 
-  scorer = ScorePredictor()
-  refiner = PoseRefinePredictor()
+  scorer = ScorePredictor(
+    ckpt_dir = '../weights/2024-01-11-20-02-45/'
+  )
+  refiner = PoseRefinePredictor(
+    ckpt_dir = '../weights/2023-10-28-18-33-37/'
+  )
   glctx = dr.RasterizeCudaContext()
   est = FoundationPose(mesh, scorer=scorer, refiner=refiner)
   logging.info("estimator initialization done")

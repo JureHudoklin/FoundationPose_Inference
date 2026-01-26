@@ -66,20 +66,19 @@ def vis_batch_data_scores(pose_data, ids, scores, pad_margin=5):
 
 
 class ScorePredictor:
-    def __init__(self, amp=True):
+    def __init__(self,
+                 ckpt_dir,
+                 model_name="model_best.pth",
+                 config_name="config.yml",
+                 amp=True):
         self.amp = amp
         self.run_name = "2024-01-11-20-02-45"
 
-        model_name = "model_best.pth"
-        code_dir = os.path.dirname(os.path.realpath(__file__))
-        ckpt_dir = f"{code_dir}/../../weights/{self.run_name}/{model_name}"
-
         self.cfg = OmegaConf.load(
-            f"{code_dir}/../../weights/{self.run_name}/config.yml"
+            f"{ckpt_dir}/{config_name}"
         )
-
         self.cfg["ckpt_dir"] = ckpt_dir
-        self.cfg["enable_amp"] = True
+        self.cfg["enable_amp"] = amp=True
 
         ########## Defaults, to be backward compatible
         if "use_normal" not in self.cfg:
@@ -100,7 +99,7 @@ class ScorePredictor:
         self.model = ScoreNetMultiPair(cfg=self.cfg, c_in=self.cfg["c_in"]).cuda()
 
         logging.info(f"Using pretrained model from {ckpt_dir}")
-        ckpt = torch.load(ckpt_dir)
+        ckpt = torch.load(f"{ckpt_dir}/{model_name}")
         if "model" in ckpt:
             ckpt = ckpt["model"]
         self.model.load_state_dict(ckpt)
@@ -176,7 +175,6 @@ class ScorePredictor:
         ids = scores.argmax(dim=0, keepdim=True)
 
         logging.debug("Score prediction done.")
-        torch.cuda.empty_cache()
 
         if get_vis:
             logging.debug("get_vis...")
